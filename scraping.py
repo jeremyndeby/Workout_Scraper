@@ -53,11 +53,14 @@ def get_workout_links(pages, driver):
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
 
                 # Extract links information via the find_all function of the soup object
-                listings = soup.find_all("div", attrs={"class": "wod-preview"})
+                listings = soup.find_all("div", attrs={"class": "wod-list"})
+                # listings = soup.find_all("div", attrs={"class": "infinite-scroll-component"})
 
-                for row in listings[1:]:
-                    url = [a['href'] for a in row.find_all("a")]
-                    workout = [row['title'], row['style'], url]
+                for row in listings:
+                    # url = [a['href'] for a in row.find_all("a", {"class": "wod-filter-item__link"})]
+                    # title = [a['title'] for a in row.find_all("div", attrs={"class": "namesake-wod-preview"})]
+                    workout = [[a['href'],  b['title']] for a, b in zip(row.find_all("a", {"class": "wod-filter-item__link"}), row.find_all("div", attrs={"class": "namesake-wod-preview"}))]
+                    # workout = [title,  url]
                     workout_infos.append(workout)
 
                 # titles = [row['title'], row['href'] for row, row in listings]
@@ -72,7 +75,7 @@ def get_workout_links(pages, driver):
                 print("Skipping. Connnection error")
                 time.sleep(random.randrange(300, 600))
 
-    return workout_links
+    # return workout_links
 
 apartment_links = get_workout_links([wodwell_url], driver)
 
