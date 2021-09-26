@@ -35,14 +35,44 @@ driver.get(wodwell_url)
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 
 
+def get_title(soup):
+    try:
+        title = [a['title'] for a in soup.find_all("div", {"class": "namesake-wod-preview"})]
+        return title[0]
+    except:
+        return np.nan
+
+
+def get_title_bis(soup):
+    try:
+        title = [a for a in soup.find_all("h1", {"class": "wod-title"})]
+        return title[0].text
+    except:
+        return np.nan
+
+
+def get_category(soup):
+    try:
+        url = [a for a in soup.find_all("span", {"class": "badge-text"})]
+        return url[0].text
+    except:
+        return np.nan
+
+
+def get_url(soup):
+    try:
+        return soup['href']
+    except:
+        return np.nan
+
+
 # Create a function that returns a list of all workout names and links for each workout page
 def get_workout_links(pages, driver):
     # Setting a list of listings links
-    workout_infos = []
+    wod_list = []
 
     # Getting length of list
     length = len(pages)
-
     while len(pages) > 0:
         for i in pages:
 
@@ -54,31 +84,37 @@ def get_workout_links(pages, driver):
 
                 # Extract links information via the find_all function of the soup object
                 listings = soup.find_all("div", attrs={"class": "wod-list"})
+                # listings2 = soup.find_all("div", attrs={"class": "namesake - wod - preview"})
+
                 # listings = soup.find_all("div", attrs={"class": "infinite-scroll-component"})
 
                 for row in listings:
-                    # url = [a['href'] for a in row.find_all("a", {"class": "wod-filter-item__link"})]
-                    # title = [a['title'] for a in row.find_all("div", attrs={"class": "namesake-wod-preview"})]
-                    workout = [[a['href'],  b['title']] for a, b in zip(row.find_all("a", {"class": "wod-filter-item__link"}), row.find_all("div", attrs={"class": "namesake-wod-preview"}))]
-                    # workout = [title,  url]
-                    workout_infos.append(workout)
+                    items = row.find_all("a", {"class": "wod-filter-item__link"})
 
-                # titles = [row['title'], row['href'] for row, row in listings]
-                page_data = [row['href'] for row in listings]
+                    for item in items:
+
+                        title = get_title(item)
+                        title_bis = get_title_bis(item)
+                        url = get_url(item)
+                        cat = get_category(item)
+
+                        wod_list.append([title, title_bis, url, cat])
 
                 pages.remove(i)
 
-                print('There are', len(pages), 'pages left to examine')
+                print(len(wod_list), 'wods available')
                 time.sleep(random.randrange(11, 21))
 
             except:
                 print("Skipping. Connnection error")
                 time.sleep(random.randrange(300, 600))
 
-    # return workout_links
+    return wod_list
 
-apartment_links = get_workout_links([wodwell_url], driver)
+wod_list = get_workout_links([wodwell_url], driver)
+wods = pd.DataFrame(wod_list, columns=['title', 'title_bis', 'url', 'cat'])
 
+print('end')
 
 # Create a function that returns a list of URLs of all pages
 def get_page_links(url, number_of_pages):
