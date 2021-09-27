@@ -130,7 +130,6 @@ dmypy.json
 
 
 /.idea
-*.xlsx
 *.csv
 *.ipynb_checkpoints
 *.log
