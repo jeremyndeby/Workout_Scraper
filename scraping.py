@@ -109,12 +109,12 @@ def get_workout_links(pages, driver):
                 for row in listings:
                     items = row.find_all("a", {"class": "wod-filter-item__link"})
                     for item in items:
-                        title = get_title(item)
-                        title_bis = get_title_bis(item)
+                        # title = get_title(item)
+                        title = get_title_bis(item)
                         url = get_url(item)
                         cat = get_category(item)
 
-                        wod_list.append([title, title_bis, url, cat])
+                        wod_list.append([title, url, cat])
 
                 pages.remove(page)
                 time.sleep(random.randrange(11, 21))
@@ -128,8 +128,9 @@ def get_workout_links(pages, driver):
 
 
 wod_list = get_workout_links(wodwell_urls, driver)
-wods = pd.DataFrame(wod_list, columns=['title', 'title_bis', 'url', 'cat'])
+wods = pd.DataFrame(wod_list, columns=['title', 'url', 'cat'])
 wods.drop_duplicates(inplace=True)
+print('Total number of unique wods:', len(wods))
 
 # ## Export the file
 wods.to_excel('output\\benchmark_workouts_wodwell.xlsx', index=False)
